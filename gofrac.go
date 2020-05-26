@@ -48,21 +48,20 @@ func Mandelbrot(w int, h int) (*bitmap, error) {
 		return nil, errors.New("gofrac: w and h must both be greater than zero")
 	}
 
-	palette := newRainbowPalette()
+	domain, err := NewRectangularDomain(-2.5, -1.0, 1.0, 1.0, w, h)
+	if err != nil {
+		return nil, errors.New("gofrac: Could not initialize a domain")
+	}
+
 	bitmap := newBitmap(h, w)
 
-	hInv := 1.0 / float64(h)
-	wInv := 1.0 / float64(w)
+	palette := newRainbowPalette()
 
-	for row := 0; row < h; row++ {
-		ty := float64(row) * hInv
-		y0 := 2.0*ty - 1.0
-
-		for col := 0; col < w; col++ {
+	for row := 0; row < domain.RowCount(); row++ {
+		for col := 0; col < domain.ColCount(row); col++ {
 			var z complex128 = 0
-			tx := float64(col) * wInv
-			x0 := 3.5*tx - 2.5
-			var c = complex(x0, y0)
+			x, y, _ := domain.At(col, row)
+			var c = complex(x, y)
 
 			count := 0
 			for mod := cmplx.Abs(z); mod <= 4.0; mod, count = cmplx.Abs(z), count+1 {
