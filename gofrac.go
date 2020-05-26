@@ -53,9 +53,7 @@ func Mandelbrot(w int, h int) (*bitmap, error) {
 		return nil, errors.New("gofrac: Could not initialize a domain")
 	}
 
-	bitmap := newBitmap(h, w)
-
-	palette := newRainbowPalette()
+	results := NewResults(h, w)
 
 	for row := 0; row < domain.RowCount(); row++ {
 		for col := 0; col < domain.ColCount(row); col++ {
@@ -71,7 +69,17 @@ func Mandelbrot(w int, h int) (*bitmap, error) {
 					break
 				}
 			}
-			(*bitmap)[row][col] = palette[count]
+			results.SetResult(row, col, z, c, count)
+		}
+	}
+
+	// this will go away shortly
+	bitmap := newBitmap(h, w)
+	palette := newRainbowPalette()
+	for row := 0; row < domain.RowCount(); row++ {
+		for col := 0; col < domain.ColCount(row); col++ {
+			_, _, iterations := results.At(row, col)
+			(*bitmap)[row][col] = palette[iterations]
 		}
 	}
 	return bitmap, nil
