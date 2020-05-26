@@ -50,3 +50,28 @@ func RenderEscapeTime(results ResultsReader) bitmap {
 
 	return bitmap
 }
+
+func RenderSmoothedEscapeTime(results ResultsReader) bitmap {
+	rows, cols := results.Dimensions()
+	bitmap := newBitmap(rows, cols)
+	palette := newRainbowPalette()
+	log2 := math.Log(2.0)
+	for row := 0; row < rows; row++ {
+		for col := 0; col < cols; col++ {
+			z, _, iterations := results.At(row, col)
+			if iterations < maxIterations-1 {
+				lz := math.Log(cmplx.Abs(z))
+				nu := math.Log(lz/log2) / log2
+
+				f := float64(iterations+1) - nu
+				flo := int(math.Floor(f))
+				//c1 := palette[flo]
+				//c2 := palette[int(math.Ceil(f))]
+				bitmap[row][col] = palette[flo]
+			} else {
+				bitmap[row][col] = palette[iterations]
+			}
+		}
+	}
+	return bitmap
+}
