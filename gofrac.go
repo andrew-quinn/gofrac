@@ -10,7 +10,7 @@ import (
 const maxIterations = 35
 
 type Frac interface {
-	frac(re float64, im float64) *Result
+	frac(loc complex128) *Result
 }
 
 func fracIt(w int, h int, f Frac) (*Results, error) {
@@ -27,8 +27,8 @@ func fracIt(w int, h int, f Frac) (*Results, error) {
 
 	for row := 0; row < domain.RowCount(); row++ {
 		for col := 0; col < domain.ColCount(row); col++ {
-			re, im, _ := domain.At(col, row)
-			r := f.frac(re, im)
+			loc, _ := domain.At(col, row)
+			r := f.frac(loc)
 
 			results.SetResult(row, col, r.z, r.c, r.iterations)
 		}
@@ -39,9 +39,9 @@ func fracIt(w int, h int, f Frac) (*Results, error) {
 
 type mandelbrot struct{}
 
-func (_ mandelbrot) frac(re float64, im float64) *Result {
+func (_ mandelbrot) frac(loc complex128) *Result {
 	var z complex128 = 0
-	var c = complex(re, im)
+	var c = loc
 
 	count := 0
 	for mod := cmplx.Abs(z); mod <= 6.0; mod, count = cmplx.Abs(z), count+1 {
