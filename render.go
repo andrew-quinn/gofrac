@@ -7,22 +7,24 @@ import (
 	"math/cmplx"
 )
 
-// colorPalette stores a numerically indexed lookup table of colors
-type colorPalette [maxIterations]color.Color
-
-// newSpectralPalette creates a spectral color map, but with the final element colored black
-func newSpectralPalette(sweep float64, offset float64) (p colorPalette) {
-	for i := 0; i < maxIterations-1; i++ {
-		t := float64(i) / float64(maxIterations-1)
-		p[i] = colorful.Hsv(sweep*t+offset, 1.0, 1.0).Clamped()
-	}
-	p[len(p)-1] = color.Black
-	return p
+type ColorSampler interface {
+	SampleColor(val float64) color.Color
 }
 
-// newRainbowPalette creates the familiar (and !!not colorblind-friendly!!) rainbow color map, but with the final element colored black
-func newRainbowPalette() colorPalette {
-	return newSpectralPalette(210.0, 135.0)
+type SpectralPalette struct {
+	Sweep  float64
+	Offset float64
+}
+
+func (p *SpectralPalette) SampleColor(val float64) color.Color {
+	if int(val) == maxIterations-1 {
+		return color.Black
+	}
+
+	t := val / float64(maxIterations-1)
+	return colorful.Hsv(t*p.Sweep+p.Offset, 1.0, 1.0)
+}
+
 }
 
 // bitmap stores a 2D field of color.Color that can be used to generate images
@@ -37,40 +39,35 @@ func newBitmap(r int, c int) bitmap {
 	return b
 }
 
-func RenderEscapeTime(results ResultsReader) bitmap {
+func RenderEscapeTime(results ResultsReader, palette ColorSampler) bitmap {
 	rows, cols := results.Dimensions()
 	bitmap := newBitmap(rows, cols)
-	palette := newRainbowPalette()
 	for row := 0; row < rows; row++ {
 		for col := 0; col < cols; col++ {
 			_, _, iterations := results.At(row, col)
-			bitmap[row][col] = palette[iterations]
+			bitmap[row][col] = palette.SampleColor(float64(iterations))
 		}
 	}
 
 	return bitmap
 }
 
-func RenderSmoothedEscapeTime(results ResultsReader) bitmap {
+func RenderSmoothedEscapeTime(results ResultsReader, palette ColorSampler) bitmap {
 	rows, cols := results.Dimensions()
 	bitmap := newBitmap(rows, cols)
-	palette := newRainbowPalette()
 	log2 := math.Log(2.0)
 	for row := 0; row < rows; row++ {
 		for col := 0; col < cols; col++ {
 			z, _, iterations := results.At(row, col)
+			var colorVal float64
 			if iterations < maxIterations-1 {
 				lz := math.Log(cmplx.Abs(z))
 				nu := math.Log(lz/log2) / log2
-
-				f := float64(iterations+1) - nu
-				flo := int(math.Floor(f))
-				//c1 := palette[flo]
-				//c2 := palette[int(math.Ceil(f))]
-				bitmap[row][col] = palette[flo]
+				colorVal = float64(iterations+1) - nu
 			} else {
-				bitmap[row][col] = palette[iterations]
+				colorVal = float64(iterations)
 			}
+			bitmap[row][col] = palette.SampleColor(colorVal)
 		}
 	}
 	return bitmap
