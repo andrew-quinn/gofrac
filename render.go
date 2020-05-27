@@ -73,35 +73,49 @@ func newBitmap(r int, c int) bitmap {
 	return b
 }
 
-func RenderEscapeTime(results ResultsReader, palette ColorSampler) bitmap {
-	rows, cols := results.Dimensions()
-	bitmap := newBitmap(rows, cols)
-	for row := 0; row < rows; row++ {
-		for col := 0; col < cols; col++ {
-			_, _, iterations := results.At(row, col)
-			bitmap[row][col] = palette.SampleColor(float64(iterations))
-		}
+type Plotter interface {
+	Plot(r *Result) float64
+}
+
+type EscapeTimePlotter struct{}
+
+func (p *EscapeTimePlotter) Plot(r *Result) float64 {
+	return float64(r.iterations)
+}
+
+var invLog2 = 1.0 / math.Log(2.0)
+
+type SmoothedEscapeTimePlotter struct{}
+
+func (p *SmoothedEscapeTimePlotter) Plot(r *Result) float64 {
+	if r.iterations < maxIterations-1 {
+		lz := math.Log(cmplx.Abs(r.z))
+		nu := math.Log(lz*invLog2) * invLog2
+		return float64(r.iterations+1) - nu
+	} else {
+		return float64(r.iterations)
 	}
 
-	return bitmap
+}
+
+func RenderEscapeTime(results ResultsReader, palette ColorSampler) bitmap {
+	p := EscapeTimePlotter{}
+	return render(&p, results, palette)
 }
 
 func RenderSmoothedEscapeTime(results ResultsReader, palette ColorSampler) bitmap {
+	p := SmoothedEscapeTimePlotter{}
+	return render(&p, results, palette)
+}
+
+func render(plotter Plotter, results ResultsReader, palette ColorSampler) bitmap {
 	rows, cols := results.Dimensions()
 	bitmap := newBitmap(rows, cols)
-	log2 := math.Log(2.0)
 	for row := 0; row < rows; row++ {
 		for col := 0; col < cols; col++ {
-			z, _, iterations := results.At(row, col)
-			var colorVal float64
-			if iterations < maxIterations-1 {
-				lz := math.Log(cmplx.Abs(z))
-				nu := math.Log(lz/log2) / log2
-				colorVal = float64(iterations+1) - nu
-			} else {
-				colorVal = float64(iterations)
-			}
-			bitmap[row][col] = palette.SampleColor(colorVal)
+			r := results.At(row, col)
+			val := plotter.Plot(r)
+			bitmap[row][col] = palette.SampleColor(val)
 		}
 	}
 	return bitmap

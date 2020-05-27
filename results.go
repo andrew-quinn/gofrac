@@ -5,7 +5,7 @@ type ResultsSetter interface {
 }
 
 type ResultsReader interface {
-	At(row int, col int) (z complex128, c complex128, iterations int)
+	At(row int, col int) *Result
 	Dimensions() (rows int, cols int)
 }
 
@@ -41,9 +41,8 @@ func (r *Results) SetResult(row int, col int, z complex128, c complex128, iterat
 	r.results[row][col].iterations = iterations
 }
 
-func (r *Results) At(row int, col int) (z complex128, c complex128, iterations int) {
-	res := r.results[row][col]
-	return res.z, res.c, res.iterations
+func (r *Results) At(row int, col int) *Result {
+	return &r.results[row][col]
 }
 
 func (r *Results) Dimensions() (rows int, cols int) {
