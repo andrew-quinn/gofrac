@@ -11,7 +11,7 @@ type DiscreteDomain interface {
 	ColCount() (cols int)
 }
 
-type RectangularDomain struct {
+type Domain struct {
 	x0, y0       float64
 	xDist, yDist float64
 	xs, ys       int
@@ -20,7 +20,7 @@ type RectangularDomain struct {
 	hInv float64
 }
 
-func (r *RectangularDomain) At(i int, j int) (loc complex128, err error) {
+func (r *Domain) At(i int, j int) (loc complex128, err error) {
 	if i < 0 || i >= r.xs || j < 0 || j >= r.ys {
 		return 0, errors.New("gofrac: sample is out of bounds")
 	}
@@ -34,19 +34,19 @@ func (r *RectangularDomain) At(i int, j int) (loc complex128, err error) {
 	return complex(re, im), nil
 }
 
-func (r *RectangularDomain) RowCount() (rows int) {
+func (r *Domain) RowCount() (rows int) {
 	return r.ys
 }
 
-func (r *RectangularDomain) ColCount() (colCount int) {
+func (r *Domain) ColCount() (colCount int) {
 	return r.xs
 }
 
-func NewRectangularDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) (*RectangularDomain, error) {
+func NewDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) (*Domain, error) {
 	if xSamples <= 0 || ySamples <= 0 {
-		return &RectangularDomain{}, errors.New("gofrac: a positive number of samples must be taken along both the x and y axes")
+		return &Domain{}, errors.New("gofrac: a positive number of samples must be taken along both the x and y axes")
 	}
-	return &RectangularDomain{
+	return &Domain{
 		x0:    x0,
 		y0:    y0,
 		xs:    xSamples,

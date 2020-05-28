@@ -9,8 +9,8 @@ import (
 // bitmap stores a 2D field of color.Color that can be used to generate images
 type bitmap [][]color.Color
 
-// newBitmap initializes a bitmap
-func newBitmap(r int, c int) bitmap {
+// NewBitmap initializes a bitmap
+func NewBitmap(r int, c int) bitmap {
 	b := make(bitmap, r)
 	for r := range b {
 		b[r] = make([]color.Color, c)
@@ -18,19 +18,9 @@ func newBitmap(r int, c int) bitmap {
 	return b
 }
 
-func RenderEscapeTime(results ResultsReader, palette ColorSampler) bitmap {
-	p := EscapeTimePlotter{}
-	return render(&p, results, palette)
-}
-
-func RenderSmoothedEscapeTime(results ResultsReader, palette ColorSampler) bitmap {
-	p := SmoothedEscapeTimePlotter{}
-	return render(&p, results, palette)
-}
-
-func render(plotter Plotter, results ResultsReader, palette ColorSampler) bitmap {
+func Render(plotter Plotter, results ResultsReader, palette ColorSampler) bitmap {
 	rows, cols := results.Dimensions()
-	bitmap := newBitmap(rows, cols)
+	bitmap := NewBitmap(rows, cols)
 
 	rowJobs := make(chan int, rows)
 

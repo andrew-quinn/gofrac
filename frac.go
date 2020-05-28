@@ -15,7 +15,7 @@ type Frac interface {
 	frac(loc complex128) *Result
 }
 
-func fracIt(d DiscreteDomain, f Frac) (*Results, error) {
+func fracIt(d DiscreteDomain, f Frac, iterations int) (*Results, error) {
 	h := d.RowCount()
 	w := d.ColCount()
 	if w < 1 || h < 1 {
@@ -55,9 +55,9 @@ func fracIt(d DiscreteDomain, f Frac) (*Results, error) {
 	return results, nil
 }
 
-type mandelbrot struct{}
+type Mandelbrot struct{}
 
-func (_ mandelbrot) frac(loc complex128) *Result {
+func (_ Mandelbrot) frac(loc complex128) *Result {
 	var z complex128 = 0
 	var c = loc
 
@@ -78,25 +78,25 @@ func (_ mandelbrot) frac(loc complex128) *Result {
 
 // Mandelbrot generates the Mandelbrot set and saves the results to a 2D slice of Results. The parameters
 // w and h are the number of samples to be taken along the horizontal and vertical axes of the domain, respectively.
-func Mandelbrot(w int, h int) *Results {
-	d, err := NewRectangularDomain(-2.5, -1.0, 1.0, 1.0, w, h)
+func DefaultMandelbrot(w int, h int) *Results {
+	d, err := NewDomain(-2.5, -1.0, 1.0, 1.0, w, h)
 	if err != nil {
-		o, _ := NewRectangularDomain(0.0, 0.0, 0.0, 0.0, 1, 1)
+		o, _ := NewDomain(0.0, 0.0, 0.0, 0.0, 1, 1)
 		d = o
 	}
 
-	r, err := fracIt(d, mandelbrot{})
+	r, err := fracIt(d, Mandelbrot{})
 	if err != nil {
 		// oops
 	}
 	return r
 }
 
-type julia struct {
+type Julia struct {
 	c complex128
 }
 
-func (j julia) frac(loc complex128) *Result {
+func (j Julia) frac(loc complex128) *Result {
 	z := loc
 	radius := 1024.0
 	count := 0
@@ -113,16 +113,16 @@ func (j julia) frac(loc complex128) *Result {
 	}
 }
 
-func Julia(w int, h int, c complex128) *Results {
+func DefaultJulia(w int, h int, c complex128) *Results {
 	x := 1.6
 	y := 1.0
-	d, err := NewRectangularDomain(-x, -y, x, y, w, h)
+	d, err := NewDomain(-x, -y, x, y, w, h)
 	if err != nil {
-		o, _ := NewRectangularDomain(0.0, 0.0, 0.0, 0.0, 1, 1)
+		o, _ := NewDomain(0.0, 0.0, 0.0, 0.0, 1, 1)
 		d = o
 	}
 
-	j := julia{c}
+	j := Julia{c}
 	r, err := fracIt(d, j)
 	if err != nil {
 		// oops
