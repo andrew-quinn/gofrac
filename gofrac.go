@@ -67,3 +67,33 @@ func Mandelbrot(w int, h int) *Results {
 	}
 	return r
 }
+
+type julia struct {
+	c complex128
+}
+
+func (j julia) frac(loc complex128) *Result {
+	z := loc
+	radius := 2.0
+	count := 0
+	for mod := cmplx.Abs(z); mod <= radius; mod, count = cmplx.Abs(z), count+1 {
+		z = z*z + j.c
+		if count == maxIterations-1 {
+			break
+		}
+	}
+	return &Result{
+		z:          z,
+		c:          j.c,
+		iterations: count,
+	}
+}
+
+func Julia(w int, h int, c complex128) *Results {
+	j := julia{c}
+	r, err := fracIt(w, h, j)
+	if err != nil {
+		// oops
+	}
+	return r
+}
