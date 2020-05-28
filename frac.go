@@ -89,22 +89,6 @@ func (_ Mandelbrot) frac(loc complex128) *Result {
 	}
 }
 
-// Mandelbrot generates the Mandelbrot set and saves the results to a 2D slice of Results. The parameters
-// w and h are the number of samples to be taken along the horizontal and vertical axes of the domain, respectively.
-func DefaultMandelbrot(w int, h int) *Results {
-	d, err := NewDomain(-2.5, -1.0, 1.0, 1.0, w, h)
-	if err != nil {
-		o, _ := NewDomain(0.0, 0.0, 0.0, 0.0, 1, 1)
-		d = o
-	}
-
-	r, err := fracIt(d, Mandelbrot{}, 100)
-	if err != nil {
-		// oops
-	}
-	return r
-}
-
 type Julia struct {
 	c complex128
 }
@@ -124,21 +108,4 @@ func (j Julia) frac(loc complex128) *Result {
 		c:          j.c,
 		iterations: count,
 	}
-}
-
-func DefaultJulia(w int, h int, c complex128) *Results {
-	x := 1.6
-	y := 1.0
-	d, err := NewDomain(-x, -y, x, y, w, h)
-	if err != nil {
-		o, _ := NewDomain(0.0, 0.0, 0.0, 0.0, 1, 1)
-		d = o
-	}
-
-	j := Julia{c}
-	r, err := fracIt(d, j, 1000)
-	if err != nil {
-		// oops
-	}
-	return r
 }
