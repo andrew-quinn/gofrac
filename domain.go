@@ -2,6 +2,7 @@ package gofrac
 
 import (
 	"errors"
+	"fmt"
 )
 
 // DiscreteDomain is a discretization of a bounded 2D space
@@ -42,10 +43,12 @@ func (r *Domain) ColCount() (colCount int) {
 	return r.xs
 }
 
-func NewDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) (*Domain, error) {
+func NewDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) *Domain {
 	if xSamples <= 0 || ySamples <= 0 {
-		return &Domain{}, errors.New("gofrac: a positive number of samples must be taken along both the x and y axes")
+		fmt.Println("gofrac: a positive number of samples must be taken along both the x and y axes")
+		return &Domain{xs: 1, ys: 1, wInv: 1.0, hInv: 1.0}
 	}
+
 	return &Domain{
 		x0:    x0,
 		y0:    y0,
@@ -55,5 +58,5 @@ func NewDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) (*Domain, error) 
 		yDist: y1 - y0,
 		wInv:  1.0 / float64(xSamples),
 		hInv:  1.0 / float64(ySamples),
-	}, nil
+	}
 }

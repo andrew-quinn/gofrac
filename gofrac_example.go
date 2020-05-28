@@ -26,16 +26,20 @@ func writeExample(filename string, img *image.RGBA) {
 }
 
 func MandelbrotExample() {
-	d, _ := NewDomain(-2.5, -1.0, 1.0, 1.0, UHDRes.w, UHDRes.h)
-	img := GetImage(Mandelbrot{}, d, &SmoothedEscapeTimePlotter{}, &PrettyBands, 25)
+	img := GetImage(
+		Mandelbrot{},
+		NewDomain(-2.5, -1.0, 1.0, 1.0, UHDRes.w, UHDRes.h),
+		&SmoothedEscapeTimePlotter{},
+		&PrettyBands,
+		25,
+	)
 	writeExample("mandelbrot.png", img)
 }
 
 func JuliaExample() {
-	d, _ := NewDomain(-1.6, -1.0, 1.6, 1.0, UHDRes.w, UHDRes.h)
 	img := GetImage(
 		Julia{c: complex(-0.8, 0.156)},
-		d,
+		NewDomain(-1.6, -1.0, 1.6, 1.0, UHDRes.w, UHDRes.h),
 		&SmoothedEscapeTimePlotter{},
 		&SpectralPalette{Sweep: 360.0},
 		200,
