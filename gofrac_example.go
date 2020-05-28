@@ -29,7 +29,7 @@ func MandelbrotExample() {
 	img := GetImage(
 		Mandelbrot{},
 		NewDomain(-2.5, -1.0, 1.0, 1.0, UHDRes.w, UHDRes.h),
-		&SmoothedEscapeTimePlotter{},
+		SmoothedEscapeTimePlotter{},
 		&PrettyBands,
 		25,
 	)
