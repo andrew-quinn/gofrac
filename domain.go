@@ -8,7 +8,7 @@ import (
 type DiscreteDomain interface {
 	At(i int, j int) (loc complex128, err error)
 	RowCount() (rows int)
-	ColCount(rowIdx int) (cols int)
+	ColCount() (cols int)
 }
 
 type RectangularDomain struct {
@@ -38,7 +38,7 @@ func (r *RectangularDomain) RowCount() (rows int) {
 	return r.ys
 }
 
-func (r *RectangularDomain) ColCount(_ int) (colCount int) {
+func (r *RectangularDomain) ColCount() (colCount int) {
 	return r.xs
 }
 

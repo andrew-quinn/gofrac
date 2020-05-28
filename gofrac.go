@@ -13,21 +13,18 @@ type Frac interface {
 	frac(loc complex128) *Result
 }
 
-func fracIt(w int, h int, f Frac) (*Results, error) {
+func fracIt(d DiscreteDomain, f Frac) (*Results, error) {
+	h := d.RowCount()
+	w := d.ColCount()
 	if w == 0 || h == 0 {
 		return nil, errors.New("gofrac: w and h must both be greater than zero")
 	}
 
-	domain, err := NewRectangularDomain(-2.5, -1.0, 1.0, 1.0, w, h)
-	if err != nil {
-		return nil, errors.New("gofrac: Could not initialize a domain")
-	}
-
 	results := NewResults(h, w)
 
-	for row := 0; row < domain.RowCount(); row++ {
-		for col := 0; col < domain.ColCount(row); col++ {
-			loc, _ := domain.At(col, row)
+	for row := 0; row < h; row++ {
+		for col := 0; col < w; col++ {
+			loc, _ := d.At(col, row)
 			r := f.frac(loc)
 
 			results.SetResult(row, col, r.z, r.c, r.iterations)
@@ -61,7 +58,13 @@ func (_ mandelbrot) frac(loc complex128) *Result {
 // Mandelbrot generates the Mandelbrot set and saves the results to a 2D slice of Results. The parameters
 // w and h are the number of samples to be taken along the horizontal and vertical axes of the domain, respectively.
 func Mandelbrot(w int, h int) *Results {
-	r, err := fracIt(w, h, mandelbrot{})
+	d, err := NewRectangularDomain(-2.5, -1.0, 1.0, 1.0, w, h)
+	if err != nil {
+		o, _ := NewRectangularDomain(0.0, 0.0, 0.0, 0.0, 1, 1)
+		d = o
+	}
+
+	r, err := fracIt(d, mandelbrot{})
 	if err != nil {
 		// oops
 	}
@@ -90,8 +93,16 @@ func (j julia) frac(loc complex128) *Result {
 }
 
 func Julia(w int, h int, c complex128) *Results {
+	x := 1.6
+	y := 1.0
+	d, err := NewRectangularDomain(-x, -y, x, y, w, h)
+	if err != nil {
+		o, _ := NewRectangularDomain(0.0, 0.0, 0.0, 0.0, 1, 1)
+		d = o
+	}
+
 	j := julia{c}
-	r, err := fracIt(w, h, j)
+	r, err := fracIt(d, j)
 	if err != nil {
 		// oops
 	}
