@@ -4,7 +4,7 @@ import (
 	"image"
 )
 
-func GetImage(f Frac, d *Domain, plotter Plotter, palette ColorSampler) *image.RGBA {
+func GetImage(f Frac, d *Domain, plotter Plotter, palette ColorSampler, maxIterations int) *image.RGBA {
 	results, err := fracIt(d, f, maxIterations)
 	if err != nil {
 		// handle me

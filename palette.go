@@ -16,11 +16,11 @@ type SpectralPalette struct {
 }
 
 func (p *SpectralPalette) SampleColor(val float64) color.Color {
-	if int(val) == maxIterations-1 {
+	if int(val) == glob.maxIterations-1 {
 		return color.Black
 	}
 
-	t := val / float64(maxIterations-1)
+	t := val / float64(glob.maxIterations-1)
 	return colorful.Hsv(t*p.Sweep+p.Offset, 1.0, 1.0)
 }
 
@@ -33,10 +33,10 @@ func NewUniformBandedPalette(colors ...color.Color) BandedPalette {
 }
 
 func (p *BandedPalette) SampleColor(val float64) color.Color {
-	if int(val) == maxIterations-1 {
+	if int(val) == glob.maxIterations-1 {
 		return color.Black
 	}
-	t := val / float64(maxIterations-1)
+	t := val / float64(glob.maxIterations-1)
 	scaledVal := t * float64(len(p.bands)-1)
 	sv := int(scaledVal)
 	c1, _ := colorful.MakeColor(p.bands[sv])

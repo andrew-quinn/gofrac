@@ -2,6 +2,7 @@ package gofrac
 
 import (
 	"errors"
+	"fmt"
 	"math/cmplx"
 	"runtime"
 	"sync"
@@ -9,13 +10,25 @@ import (
 
 //var debug = log.New(os.Stdout, "DEBUG: ", log.LstdFlags)
 
-const maxIterations = 1000
+var glob = struct {
+	maxIterations    int
+	invMaxIterations float64
+}{100, .01}
+
+func setMaxIterations(iterations int) {
+	if iterations < 1 {
+		fmt.Println("gofrac: the maximum iteration count must be greater than zero")
+	}
+	glob.maxIterations = iterations
+	glob.invMaxIterations = 1 / float64(iterations)
+}
 
 type Frac interface {
 	frac(loc complex128) *Result
 }
 
 func fracIt(d DiscreteDomain, f Frac, iterations int) (*Results, error) {
+	setMaxIterations(iterations)
 	h := d.RowCount()
 	w := d.ColCount()
 	if w < 1 || h < 1 {
@@ -65,7 +78,7 @@ func (_ Mandelbrot) frac(loc complex128) *Result {
 	for mod := cmplx.Abs(z); mod <= 6.0; mod, count = cmplx.Abs(z), count+1 {
 		z = z*z + c
 
-		if count == maxIterations-1 {
+		if count == glob.maxIterations-1 {
 			break
 		}
 	}
@@ -85,7 +98,7 @@ func DefaultMandelbrot(w int, h int) *Results {
 		d = o
 	}
 
-	r, err := fracIt(d, Mandelbrot{})
+	r, err := fracIt(d, Mandelbrot{}, 100)
 	if err != nil {
 		// oops
 	}
@@ -102,7 +115,7 @@ func (j Julia) frac(loc complex128) *Result {
 	count := 0
 	for mod := cmplx.Abs(z); mod <= radius; mod, count = cmplx.Abs(z), count+1 {
 		z = z*z + j.c
-		if count == maxIterations-1 {
+		if count == glob.maxIterations-1 {
 			break
 		}
 	}
@@ -123,7 +136,7 @@ func DefaultJulia(w int, h int, c complex128) *Results {
 	}
 
 	j := Julia{c}
-	r, err := fracIt(d, j)
+	r, err := fracIt(d, j, 1000)
 	if err != nil {
 		// oops
 	}
