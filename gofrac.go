@@ -18,7 +18,7 @@ type Frac interface {
 func fracIt(d DiscreteDomain, f Frac) (*Results, error) {
 	h := d.RowCount()
 	w := d.ColCount()
-	if w == 0 || h == 0 {
+	if w < 1 || h < 0 {
 		return nil, errors.New("gofrac: w and h must both be greater than zero")
 	}
 
