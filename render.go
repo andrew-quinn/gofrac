@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"math"
 	"math/cmplx"
+	"runtime"
+	"sync"
 )
 
 type ColorSampler interface {
@@ -111,12 +113,31 @@ func RenderSmoothedEscapeTime(results ResultsReader, palette ColorSampler) bitma
 func render(plotter Plotter, results ResultsReader, palette ColorSampler) bitmap {
 	rows, cols := results.Dimensions()
 	bitmap := newBitmap(rows, cols)
-	for row := 0; row < rows; row++ {
-		for col := 0; col < cols; col++ {
-			r := results.At(row, col)
-			val := plotter.Plot(r)
-			bitmap[row][col] = palette.SampleColor(val)
-		}
+
+	rowJobs := make(chan int, rows)
+
+	numWorkers := runtime.NumCPU()
+	wg := sync.WaitGroup{}
+	for worker := 0; worker < numWorkers; worker++ {
+		wg.Add(1)
+		go func() {
+			for row := range rowJobs {
+				for col := 0; col < cols; col++ {
+					r := results.At(row, col)
+					val := plotter.Plot(r)
+					bitmap[row][col] = palette.SampleColor(val)
+				}
+			}
+			wg.Done()
+		}()
 	}
+
+	for row := 0; row < rows; row++ {
+		rowJobs <- row
+	}
+
+	close(rowJobs)
+	wg.Wait()
+
 	return bitmap
 }

@@ -3,11 +3,13 @@ package gofrac
 import (
 	"errors"
 	"math/cmplx"
+	"runtime"
+	"sync"
 )
 
 //var debug = log.New(os.Stdout, "DEBUG: ", log.LstdFlags)
 
-const maxIterations = 35
+const maxIterations = 1000
 
 type Frac interface {
 	frac(loc complex128) *Result
@@ -22,14 +24,33 @@ func fracIt(d DiscreteDomain, f Frac) (*Results, error) {
 
 	results := NewResults(h, w)
 
-	for row := 0; row < h; row++ {
-		for col := 0; col < w; col++ {
-			loc, _ := d.At(col, row)
-			r := f.frac(loc)
+	rowJobs := make(chan int, h)
 
-			results.SetResult(row, col, r.z, r.c, r.iterations)
-		}
+	numWorkers := runtime.NumCPU()
+	wg := sync.WaitGroup{}
+	for worker := 0; worker < numWorkers; worker++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for row := range rowJobs {
+				for col := 0; col < w; col++ {
+					loc, err := d.At(col, row)
+					if err != nil {
+						panic(err)
+					}
+					r := f.frac(loc)
+					results.SetResult(row, col, r.z, r.c, r.iterations)
+				}
+			}
+		}()
 	}
+
+	for row := 0; row < h; row++ {
+		rowJobs <- row
+	}
+
+	close(rowJobs)
+	wg.Wait()
 
 	return results, nil
 }
@@ -77,7 +98,7 @@ type julia struct {
 
 func (j julia) frac(loc complex128) *Result {
 	z := loc
-	radius := 2.0
+	radius := 1024.0
 	count := 0
 	for mod := cmplx.Abs(z); mod <= radius; mod, count = cmplx.Abs(z), count+1 {
 		z = z*z + j.c
