@@ -27,7 +27,7 @@ type Frac interface {
 	frac(loc complex128) *Result
 }
 
-func fracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
+func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
 	setMaxIterations(iterations)
 	rows, cols := d.Dimensions()
 	if cols < 1 || rows < 1 {
