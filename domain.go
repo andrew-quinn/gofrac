@@ -5,11 +5,10 @@ import (
 	"fmt"
 )
 
-// DiscreteDomain is a discretization of a bounded 2D space
-type DiscreteDomain interface {
+// DomainReader reads values from a discretization of a bounded 2D space
+type DomainReader interface {
 	At(i int, j int) (loc complex128, err error)
-	RowCount() (rows int)
-	ColCount() (cols int)
+	Dimensions() (rows int, cols int)
 }
 
 type Domain struct {
@@ -35,12 +34,8 @@ func (r *Domain) At(i int, j int) (loc complex128, err error) {
 	return complex(re, im), nil
 }
 
-func (r *Domain) RowCount() (rows int) {
-	return r.ys
-}
-
-func (r *Domain) ColCount() (colCount int) {
-	return r.xs
+func (r *Domain) Dimensions() (rows int, cols int) {
+	return r.ys, r.xs
 }
 
 func NewDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) *Domain {

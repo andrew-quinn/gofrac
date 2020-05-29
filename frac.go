@@ -27,17 +27,16 @@ type Frac interface {
 	frac(loc complex128) *Result
 }
 
-func fracIt(d DiscreteDomain, f Frac, iterations int) (*Results, error) {
+func fracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
 	setMaxIterations(iterations)
-	h := d.RowCount()
-	w := d.ColCount()
-	if w < 1 || h < 1 {
-		return nil, errors.New("gofrac: w and h must both be greater than zero")
+	rows, cols := d.Dimensions()
+	if cols < 1 || rows < 1 {
+		return nil, errors.New("gofrac: the domain must be sampled at least once along each axis")
 	}
 
-	results := NewResults(h, w)
+	results := NewResults(rows, cols)
 
-	rowJobs := make(chan int, h)
+	rowJobs := make(chan int, rows)
 
 	numWorkers := runtime.NumCPU()
 	wg := sync.WaitGroup{}
@@ -46,7 +45,7 @@ func fracIt(d DiscreteDomain, f Frac, iterations int) (*Results, error) {
 		go func() {
 			defer wg.Done()
 			for row := range rowJobs {
-				for col := 0; col < w; col++ {
+				for col := 0; col < cols; col++ {
 					loc, err := d.At(col, row)
 					if err != nil {
 						panic(err)
@@ -58,7 +57,7 @@ func fracIt(d DiscreteDomain, f Frac, iterations int) (*Results, error) {
 		}()
 	}
 
-	for row := 0; row < h; row++ {
+	for row := 0; row < rows; row++ {
 		rowJobs <- row
 	}
 
