@@ -67,14 +67,16 @@ func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
 	return &results, nil
 }
 
-type Mandelbrot struct{}
+type Mandelbrot struct{
+	radius float64
+}
 
-func (_ Mandelbrot) frac(loc complex128) *Result {
+func (m Mandelbrot) frac(loc complex128) *Result {
 	var z complex128 = 0
 	var c = loc
 
 	count := 0
-	for mod := cmplx.Abs(z); mod <= 6.0; mod, count = cmplx.Abs(z), count+1 {
+	for mod := cmplx.Abs(z); mod <= m.radius; mod, count = cmplx.Abs(z), count+1 {
 		z = z*z + c
 
 		if count == glob.maxIterations-1 {
@@ -90,13 +92,13 @@ func (_ Mandelbrot) frac(loc complex128) *Result {
 
 type Julia struct {
 	c complex128
+	radius float64
 }
 
 func (j Julia) frac(loc complex128) *Result {
 	z := loc
-	radius := 1024.0
 	count := 0
-	for mod := cmplx.Abs(z); mod <= radius; mod, count = cmplx.Abs(z), count+1 {
+	for mod := cmplx.Abs(z); mod <= j.radius; mod, count = cmplx.Abs(z), count+1 {
 		z = z*z + j.c
 		if count == glob.maxIterations-1 {
 			break
