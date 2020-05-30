@@ -35,6 +35,7 @@ func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
 	}
 
 	results := NewResults(rows, cols)
+	defer results.Done()
 
 	rowJobs := make(chan int, rows)
 
