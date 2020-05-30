@@ -64,7 +64,7 @@ func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
 	close(rowJobs)
 	wg.Wait()
 
-	return results, nil
+	return &results, nil
 }
 
 type Mandelbrot struct{}

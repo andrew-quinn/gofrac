@@ -18,7 +18,7 @@ func NewBitmap(r int, c int) bitmap {
 	return b
 }
 
-func Render(plotter Plotter, results ResultsReader, palette ColorSampler) bitmap {
+func Render(results *Results, plotter Plotter, palette ColorSampler) bitmap {
 	rows, cols := results.Dimensions()
 	bitmap := NewBitmap(rows, cols)
 
@@ -31,8 +31,8 @@ func Render(plotter Plotter, results ResultsReader, palette ColorSampler) bitmap
 		go func() {
 			for row := range rowJobs {
 				for col := 0; col < cols; col++ {
-					r := results.At(row, col)
-					val := plotter.Plot(r)
+					result := results.At(row, col)
+					val := plotter.Plot(result)
 					bitmap[row][col] = palette.SampleColor(val)
 				}
 			}

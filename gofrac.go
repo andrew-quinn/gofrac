@@ -12,7 +12,7 @@ func GetImage(f Frac, d DomainReader, plotter Plotter, palette ColorSampler, max
 		return image.NewRGBA(image.Rect(0, 0, 0, 0))
 	}
 
-	bitmap := Render(plotter, results, palette)
+	bitmap := Render(results, plotter, palette)
 	h, w := d.Dimensions()
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 	for y, row := range bitmap {
