@@ -36,12 +36,25 @@ func (p *BandedPalette) SampleColor(val float64) color.Color {
 	if int(val) == glob.maxIterations-1 {
 		return color.Black
 	}
+
+	i := int(float64(len(p.bands)) * val / float64(glob.maxIterations-1))
+	return p.bands[i]
+}
+
+type BlendedBandedPalette struct {
+	BandedPalette
+}
+
+func (p *BlendedBandedPalette) SampleColor(val float64) color.Color {
+	if int(val) == glob.maxIterations-1 {
+		return color.Black
+	}
 	t := val / float64(glob.maxIterations-1)
 	scaledVal := t * float64(len(p.bands)-1)
 	sv := int(scaledVal)
 	c1, _ := colorful.MakeColor(p.bands[sv])
 	c2, _ := colorful.MakeColor(p.bands[sv+1])
-	return c1.BlendHcl(c2, scaledVal-math.Floor(scaledVal))
+	return c1.BlendLab(c2, scaledVal-math.Floor(scaledVal))
 }
 
 var PrettyBands = NewUniformBandedPalette(
@@ -59,3 +72,7 @@ var PrettyBands2 = NewUniformBandedPalette(
 	colorful.Hsv(35.0, 0.17, 0.85),
 	colorful.Hsv(52.0, 0.06, 1.00),
 )
+
+var PrettyBlends = BlendedBandedPalette{PrettyBands}
+
+var PrettyBlends2 = BlendedBandedPalette{PrettyBands2}
