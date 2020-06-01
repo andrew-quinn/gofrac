@@ -76,3 +76,27 @@ var PrettyBands2 = NewUniformBandedPalette(
 var PrettyBlends = BlendedBandedPalette{PrettyBands}
 
 var PrettyBlends2 = BlendedBandedPalette{PrettyBands2}
+
+type PeriodicPalette struct{
+	BandedPalette
+	period int
+}
+
+func (p *PeriodicPalette) SampleColor(val float64) color.Color {
+	if int(val) == glob.maxIterations-1 {
+		return color.Black
+	}
+
+	idx := (int(val) / p.period) % len(p.bands)
+	return p.bands[idx]
+}
+
+var PrettyPeriodic = PeriodicPalette{
+	period: 1,
+	BandedPalette: PrettyBands,
+}
+
+var PrettyPeriodic2 = PeriodicPalette{
+	period: 10,
+	BandedPalette: PrettyBands2,
+}
