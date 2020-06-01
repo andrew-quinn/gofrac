@@ -15,6 +15,10 @@ var glob = struct {
 	invMaxIterations float64
 }{100, .01}
 
+func MaxIterations() int {
+	return glob.maxIterations
+}
+
 func setMaxIterations(iterations int) {
 	if iterations < 1 {
 		fmt.Println("gofrac: the maximum iteration count must be greater than zero")
@@ -24,7 +28,7 @@ func setMaxIterations(iterations int) {
 }
 
 type Frac interface {
-	frac(loc complex128) *Result
+	Frac(loc complex128) *Result
 }
 
 func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
@@ -51,8 +55,8 @@ func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
 					if err != nil {
 						panic(err)
 					}
-					r := f.frac(loc)
-					results.SetResult(row, col, r.z, r.c, r.iterations)
+					r := f.Frac(loc)
+					results.SetResult(row, col, r.Z, r.C, r.Iterations)
 				}
 			}
 		}()
@@ -68,46 +72,38 @@ func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
 	return &results, nil
 }
 
-type Mandelbrot struct{
-	radius float64
+type Quadratic struct {
+	Radius float64
 }
 
-func (m Mandelbrot) frac(loc complex128) *Result {
-	var z complex128 = 0
-	var c = loc
-
+func (q Quadratic) q(z complex128, c complex128) *Result {
 	count := 0
-	for mod := cmplx.Abs(z); mod <= m.radius; mod, count = cmplx.Abs(z), count+1 {
+	for mod := cmplx.Abs(z); mod <= q.Radius; mod, count = cmplx.Abs(z), count+1 {
 		z = z*z + c
-
 		if count == glob.maxIterations-1 {
 			break
 		}
 	}
 	return &Result{
-		z:          z,
-		c:          c,
-		iterations: count,
+		Z:          z,
+		C:          c,
+		Iterations: count,
 	}
 }
 
-type Julia struct {
-	c complex128
-	radius float64
+type Mandelbrot struct {
+	Quadratic
 }
 
-func (j Julia) frac(loc complex128) *Result {
-	z := loc
-	count := 0
-	for mod := cmplx.Abs(z); mod <= j.radius; mod, count = cmplx.Abs(z), count+1 {
-		z = z*z + j.c
-		if count == glob.maxIterations-1 {
-			break
-		}
-	}
-	return &Result{
-		z:          z,
-		c:          j.c,
-		iterations: count,
-	}
+func (m Mandelbrot) Frac(loc complex128) *Result {
+	return m.q(0, loc)
+}
+
+type JuliaQ struct {
+	Quadratic
+	C complex128
+}
+
+func (j JuliaQ) Frac(loc complex128) *Result {
+	return j.q(loc, j.C)
 }

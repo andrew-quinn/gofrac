@@ -23,11 +23,11 @@ var PrettyBlends = BlendedBandedPalette{PrettyBands}
 var PrettyBlends2 = BlendedBandedPalette{PrettyBands2}
 
 var PrettyPeriodic = PeriodicPalette{
-	period:        1,
+	Period:        1,
 	BandedPalette: PrettyBands,
 }
 
 var PrettyPeriodic2 = PeriodicPalette{
-	period:        10,
+	Period:        10,
 	BandedPalette: PrettyBands2,
 }

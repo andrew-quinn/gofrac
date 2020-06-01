@@ -12,7 +12,7 @@ type Plotter interface {
 type EscapeTimePlotter struct{}
 
 func (p EscapeTimePlotter) Plot(r *Result) float64 {
-	return float64(r.iterations)
+	return float64(r.Iterations)
 }
 
 var invLog2 = math.Log2E
@@ -26,19 +26,19 @@ func smoothVal(val float64, z complex128) float64 {
 type SmoothedEscapeTimePlotter struct{}
 
 func (p SmoothedEscapeTimePlotter) Plot(r *Result) float64 {
-	if r.iterations == glob.maxIterations-1 {
-		return float64(r.iterations)
+	if r.Iterations == glob.maxIterations-1 {
+		return float64(r.Iterations)
 	}
-	return smoothVal(float64(r.iterations), r.z)
+	return smoothVal(float64(r.Iterations), r.Z)
 }
 
 type NormalizedEscapeTimePlotter struct{}
 
 func (p NormalizedEscapeTimePlotter) Plot(r *Result) float64 {
-	if r.iterations == glob.maxIterations-1 {
-		return float64(r.iterations)
+	if r.Iterations == glob.maxIterations-1 {
+		return float64(r.Iterations)
 	}
-	return r.nFactor * float64(glob.maxIterations-1)
+	return r.NFactor * float64(glob.maxIterations-1)
 }
 
 type NormalizedSmoothedEscapeTimePlotter struct {
@@ -51,5 +51,5 @@ func (p NormalizedSmoothedEscapeTimePlotter) Plot(r *Result) float64 {
 		return val
 	}
 
-	return smoothVal(val, r.z) - 1 + math.Log(math.Log(8000.0)) * invLog2
+	return smoothVal(val, r.Z) - 1 + math.Log(math.Log(8000.0))*invLog2
 }

@@ -1,10 +1,10 @@
 package gofrac
 
 type Result struct {
-	z          complex128
-	c          complex128
-	iterations int
-	nFactor    float64
+	Z          complex128
+	C          complex128
+	Iterations int
+	NFactor    float64
 }
 
 type Results [][]Result
@@ -18,9 +18,9 @@ func NewResults(rows int, cols int) Results {
 }
 
 func (r Results) SetResult(row int, col int, z complex128, c complex128, iterations int) {
-	r[row][col].z = z
-	r[row][col].c = c
-	r[row][col].iterations = iterations
+	r[row][col].Z = z
+	r[row][col].C = c
+	r[row][col].Iterations = iterations
 }
 
 func (r Results) At(row int, col int) *Result {
@@ -43,9 +43,9 @@ func calculateAccumulatedHistogram(r Results) (hist []int) {
 	// regular histogram
 	for row := range r {
 		for col := range r[row] {
-			n := r[row][col].iterations
+			n := r[row][col].Iterations
 			if n < glob.maxIterations-1 {
-				hist[r[row][col].iterations]++
+				hist[r[row][col].Iterations]++
 			}
 		}
 	}
@@ -75,9 +75,9 @@ func setNFactors(r Results, hist []int) {
 
 	for row := range r {
 		for col := range r[row] {
-			i := r[row][col].iterations
+			i := r[row][col].Iterations
 			if i < glob.maxIterations-1 {
-				r[row][col].nFactor = float64(hist[i]) * invTotal
+				r[row][col].NFactor = float64(hist[i]) * invTotal
 			}
 		}
 	}

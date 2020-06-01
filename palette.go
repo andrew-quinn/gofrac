@@ -59,7 +59,7 @@ func (p *BlendedBandedPalette) SampleColor(val float64) color.Color {
 
 type PeriodicPalette struct {
 	BandedPalette
-	period int
+	Period int
 }
 
 func (p *PeriodicPalette) SampleColor(val float64) color.Color {
@@ -67,6 +67,6 @@ func (p *PeriodicPalette) SampleColor(val float64) color.Color {
 		return color.Black
 	}
 
-	idx := (int(val) / p.period) % len(p.bands)
+	idx := (int(val) / p.Period) % len(p.bands)
 	return p.bands[idx]
 }

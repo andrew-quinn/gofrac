@@ -27,18 +27,18 @@ func writeExample(filename string, img *image.RGBA) {
 
 func MandelbrotExample() {
 	img := GetImage(
-		Mandelbrot{radius: 8.0},
+		Mandelbrot{Quadratic{8000.0}},
 		NewDomain(-2.5, -1.0, 1.0, 1.0, UHDRes.w, UHDRes.h),
 		SmoothedEscapeTimePlotter{},
-		&PrettyBands,
-		25,
+		&PrettyPeriodic,
+		2500,
 	)
 	writeExample("mandelbrot.png", img)
 }
 
-func JuliaExample() {
+func JuliaQExample() {
 	img := GetImage(
-		Julia{c: complex(-0.8, 0.156), radius: 1024.0},
+		JuliaQ{Quadratic{1024.0}, complex(-0.8, 0.156)},
 		NewDomain(-1.6, -1.0, 1.6, 1.0, UHDRes.w, UHDRes.h),
 		&SmoothedEscapeTimePlotter{},
 		&SpectralPalette{Sweep: 360.0},
