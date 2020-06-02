@@ -95,6 +95,10 @@ type Mandelbrot struct {
 	Quadratic
 }
 
+func NewMandelbrot(radius float64) *Mandelbrot {
+	return &Mandelbrot{Quadratic{radius}}
+}
+
 func (m Mandelbrot) Frac(loc complex128) *Result {
 	return m.q(0, loc)
 }
@@ -102,6 +106,10 @@ func (m Mandelbrot) Frac(loc complex128) *Result {
 type JuliaQ struct {
 	Quadratic
 	C complex128
+}
+
+func NewJuliaQ(radius float64, c complex128) *JuliaQ {
+	return &JuliaQ{Quadratic{radius}, c}
 }
 
 func (j JuliaQ) Frac(loc complex128) *Result {
