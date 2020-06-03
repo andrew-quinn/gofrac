@@ -23,11 +23,11 @@ var BWStripes = NewUniformBandedPalette(
 	colorful.Hsv(0, 0, 1),
 )
 
-var PrettyBlends = BlendedBandedPalette{PrettyBands}
+var PrettyBlends = BlendedBandedPalette(PrettyBands)
 
-var PrettyBlends2 = BlendedBandedPalette{PrettyBands2}
+var PrettyBlends2 = BlendedBandedPalette(PrettyBands2)
 
-var BWBlends = BlendedBandedPalette{BWStripes}
+var BWBlends = BlendedBandedPalette(BWStripes)
 
 var PrettyPeriodic = PeriodicPalette{
 	Period:        1,
