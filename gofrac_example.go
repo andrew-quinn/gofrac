@@ -1,3 +1,7 @@
+// Copyright 2020 Andrew Quinn. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package gofrac
 
 import (
@@ -25,6 +29,8 @@ func writeExample(filename string, img *image.RGBA) {
 	png.Encode(outFile, img)
 }
 
+// MandelbrotExample generates the classic Mandelbrot image and stores it as
+// "mandelbrot.png".
 func MandelbrotExample() {
 	img := GetImage(
 		NewMandelbrot(8000.0),
@@ -36,6 +42,8 @@ func MandelbrotExample() {
 	writeExample("mandelbrot.png", img)
 }
 
+// JuliaQExample generates an interesting quadratic Julia set and stores it as
+// "julia.png".
 func JuliaQExample() {
 	img := GetImage(
 		NewJuliaQ(1024.0, complex(-0.8, 0.156)),

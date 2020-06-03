@@ -1,3 +1,7 @@
+// Copyright 2020 Andrew Quinn. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package gofrac
 
 import (
@@ -6,10 +10,11 @@ import (
 	"sync"
 )
 
-// bitmap stores a 2D field of color.Color that can be used to generate images
+// bitmap stores a 2D field of color.Color that can be used to generate images.
 type bitmap [][]color.Color
 
-// NewBitmap initializes a bitmap
+// NewBitmap constructs a slice of length r of slices of color.Colors, each of
+// which are of length c.
 func NewBitmap(r int, c int) bitmap {
 	b := make(bitmap, r)
 	for r := range b {
@@ -18,6 +23,8 @@ func NewBitmap(r int, c int) bitmap {
 	return b
 }
 
+// Render combines the fractal iteration results with a plotting method and
+// generates a bitmap according to the color palette provided.
 func Render(results *Results, plotter Plotter, palette ColorSampler) bitmap {
 	rows, cols := results.Dimensions()
 	bitmap := NewBitmap(rows, cols)

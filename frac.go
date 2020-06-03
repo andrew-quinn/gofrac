@@ -1,3 +1,7 @@
+// Copyright 2020 Andrew Quinn. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package gofrac
 
 import (
@@ -10,11 +14,14 @@ import (
 
 //var debug = log.New(os.Stdout, "DEBUG: ", log.LstdFlags)
 
+// :-\
 var glob = struct {
 	maxIterations    int
 	invMaxIterations float64
 }{100, .01}
 
+// MaxIterations gets the maximum number of iterations that should be performed
+// before considering a point to be inside a set.
 func MaxIterations() int {
 	return glob.maxIterations
 }
@@ -27,10 +34,16 @@ func setMaxIterations(iterations int) {
 	glob.invMaxIterations = 1 / float64(iterations)
 }
 
+// TODO: Rename and document
 type Frac interface {
+	// Frac performs iterations of a fractal equation for a complex number
+	// given by loc.
 	Frac(loc complex128) *Result
 }
 
+// FracIt applies the fractal calculation given by f to every sample in the
+// domain d. The maximum number of iterations to be performed is given by
+// iterations.
 func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
 	setMaxIterations(iterations)
 	rows, cols := d.Dimensions()
@@ -72,7 +85,9 @@ func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
 	return &results, nil
 }
 
+// Quadratic stores the information needed by a quadratic fractal.
 type Quadratic struct {
+	// Radius is the bailout radius of a fractal calculation.
 	Radius float64
 }
 
@@ -91,10 +106,13 @@ func (q Quadratic) q(z complex128, c complex128) *Result {
 	}
 }
 
+// The Mandelbrot set, which results from iterating the function
+// f_c(z) = z^2 + c, for all complex numbers c and z_0 = 0.
 type Mandelbrot struct {
 	Quadratic
 }
 
+// NewMandelbrot constructs a Mandelbrot struct with a given bailout radius.
 func NewMandelbrot(radius float64) *Mandelbrot {
 	return &Mandelbrot{Quadratic{radius}}
 }
@@ -103,11 +121,15 @@ func (m Mandelbrot) Frac(loc complex128) *Result {
 	return m.q(0, loc)
 }
 
+// JuliaQ is the quadratic Julia set, which results from iterating the function
+// f_C(z) = z^2 + C for a all complex numbers z and a given complex number C.
 type JuliaQ struct {
 	Quadratic
 	C complex128
 }
 
+// NewJuliaQ constructs a new JuliaQ struct with a given bailout radius and a
+// complex parameter c corresponding to the C in f_C(z) = z^2 + C.
 func NewJuliaQ(radius float64, c complex128) *JuliaQ {
 	return &JuliaQ{Quadratic{radius}, c}
 }

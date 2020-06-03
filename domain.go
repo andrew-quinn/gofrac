@@ -1,3 +1,7 @@
+// Copyright 2020 Andrew Quinn. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package gofrac
 
 import (
@@ -5,12 +9,24 @@ import (
 	"fmt"
 )
 
-// DomainReader reads values from a discretization of a bounded 2D space
+// DomainReader reads values from a discretization of a bounded 2D space.
 type DomainReader interface {
+	// At returns the underlying coordinates of a sample (i, j) in a domain as
+	//a complex number, where the sample (0, 0) is the top-left corner of the
+	// domain. If a non-existent sample is requested, an error is returned.
 	At(i int, j int) (loc complex128, err error)
+
+	// Dimensions returns the number of samples taken along each axis of a
+	// domain as rows and columns.
 	Dimensions() (rows int, cols int)
 }
 
+// Domain stores bounds and sampling information over a rectangular 2D surface.
+//
+// The lower-left corner of the domain is stored in (x0, y0) and reaches to the
+// upper-right corner at (x0+xDist, y0+yDist). Along the x and y axes, xs and
+// ys samples are taken, respectively. The inverses of xDist and yDist are
+// stored in wInv and hInv, respectively, to speed up computation.
 type Domain struct {
 	x0, y0       float64
 	xDist, yDist float64
@@ -38,6 +54,12 @@ func (r *Domain) Dimensions() (rows int, cols int) {
 	return r.ys, r.xs
 }
 
+// NewDomain constructs a rectangular 2D domain.
+//
+// (x0, y0) is the bottom-left corner of the domain.
+// (y0, y1) is the top-right corner of the domain.
+// The domain is sampled xSamples and ySamples times along the x and y axes,
+// respectively.
 func NewDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) *Domain {
 	if xSamples <= 0 || ySamples <= 0 {
 		fmt.Println("gofrac: a positive number of samples must be taken along both the x and y axes")
