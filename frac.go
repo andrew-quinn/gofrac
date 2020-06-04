@@ -34,8 +34,8 @@ func setMaxIterations(iterations int) error {
 	return nil
 }
 
-// TODO: Rename and document
-type Frac interface {
+// Fraccer maps a point in the complex plane to the result of a fractal calculation
+type Fraccer interface {
 	// Frac performs iterations of a fractal equation for a complex number
 	// given by loc.
 	Frac(loc complex128) *Result
@@ -44,7 +44,7 @@ type Frac interface {
 // FracIt applies the fractal calculation given by f to every sample in the
 // domain d. The maximum number of iterations to be performed is given by
 // iterations.
-func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
+func FracIt(d DomainReader, f Fraccer, iterations int) (*Results, error) {
 	err := setMaxIterations(iterations)
 	if err != nil {
 		return nil, err
