@@ -6,7 +6,6 @@ package gofrac
 
 import (
 	"errors"
-	"fmt"
 	"math/cmplx"
 	"runtime"
 	"sync"
@@ -26,12 +25,13 @@ func MaxIterations() int {
 	return glob.maxIterations
 }
 
-func setMaxIterations(iterations int) {
+func setMaxIterations(iterations int) error {
 	if iterations < 1 {
-		fmt.Println("gofrac: the maximum iteration count must be greater than zero")
+		return errors.New("gofrac: the maximum iteration count must be greater than zero")
 	}
 	glob.maxIterations = iterations
 	glob.invMaxIterations = 1 / float64(iterations)
+	return nil
 }
 
 // TODO: Rename and document
@@ -45,7 +45,11 @@ type Frac interface {
 // domain d. The maximum number of iterations to be performed is given by
 // iterations.
 func FracIt(d DomainReader, f Frac, iterations int) (*Results, error) {
-	setMaxIterations(iterations)
+	err := setMaxIterations(iterations)
+	if err != nil {
+		return nil, err
+	}
+
 	rows, cols := d.Dimensions()
 	if cols < 1 || rows < 1 {
 		return nil, errors.New("gofrac: the domain must be sampled at least once along each axis")
