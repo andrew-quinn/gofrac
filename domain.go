@@ -6,7 +6,6 @@ package gofrac
 
 import (
 	"errors"
-	"fmt"
 )
 
 // DomainReader reads values from a discretization of a bounded 2D space.
@@ -60,10 +59,9 @@ func (r *Domain) Dimensions() (rows int, cols int) {
 // (y0, y1) is the top-right corner of the domain.
 // The domain is sampled xSamples and ySamples times along the x and y axes,
 // respectively.
-func NewDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) *Domain {
+func NewDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) (d *Domain, err error) {
 	if xSamples <= 0 || ySamples <= 0 {
-		fmt.Println("gofrac: a positive number of samples must be taken along both the x and y axes")
-		return &Domain{xs: 1, ys: 1, wInv: 1.0, hInv: 1.0}
+		return nil, errors.New("gofrac: The number of samples along any axis must be greater than zero")
 	}
 
 	return &Domain{
@@ -75,5 +73,5 @@ func NewDomain(x0, y0, x1, y1 float64, xSamples, ySamples int) *Domain {
 		yDist: y1 - y0,
 		wInv:  1.0 / float64(xSamples),
 		hInv:  1.0 / float64(ySamples),
-	}
+	}, nil
 }
