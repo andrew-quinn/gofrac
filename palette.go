@@ -13,9 +13,14 @@ import (
 // ColorSampler converts a floating point value to a color.Color in a color
 // palette.
 type ColorSampler interface {
+	// TODO: Make "blackout" color configurable
 	// SampleColor returns the color.Color of a palette corresponding to a
 	// floating point value given by val.
-	SampleColor(val float64) color.Color
+	SampleColor(val float64, maxIterations int) color.Color
+}
+
+func isConvergent(val float64, maxIterations int) bool {
+	return int(val) == maxIterations-1 || maxIterations <= 1
 }
 
 // SpectralPalette contains a range of hues from portion of the HSV color space
@@ -26,12 +31,12 @@ type SpectralPalette struct {
 	Offset float64
 }
 
-func (p SpectralPalette) SampleColor(val float64) color.Color {
-	if int(val) == glob.maxIterations-1 {
+func (p SpectralPalette) SampleColor(val float64, maxIterations int) color.Color {
+	if isConvergent(val, maxIterations) {
 		return color.Black
 	}
 
-	t := val / float64(glob.maxIterations-1)
+	t := val / float64(maxIterations-1)
 	return colorful.Hsv(t*p.Sweep+p.Offset, 1.0, 1.0)
 }
 
@@ -46,12 +51,12 @@ func NewUniformBandedPalette(colors ...color.Color) BandedPalette {
 	return colors
 }
 
-func (p BandedPalette) SampleColor(val float64) color.Color {
-	if int(val) == glob.maxIterations-1 {
+func (p BandedPalette) SampleColor(val float64, maxIterations int) color.Color {
+	if isConvergent(val, maxIterations) {
 		return color.Black
 	}
 
-	i := int(float64(len(p)) * val / float64(glob.maxIterations-1))
+	i := int(float64(len(p)) * val / float64(maxIterations-1))
 	return p[i]
 }
 
@@ -64,8 +69,8 @@ func NewUniformBlendedBandedPalette(colors ...color.Color) BlendedBandedPalette 
 	return BlendedBandedPalette(NewUniformBandedPalette(colors...))
 }
 
-func (p BlendedBandedPalette) SampleColor(val float64) color.Color {
-	if int(val) == glob.maxIterations-1 {
+func (p BlendedBandedPalette) SampleColor(val float64, maxIterations int) color.Color {
+	if isConvergent(val, maxIterations) {
 		return color.Black
 	}
 	t := val / float64(glob.maxIterations-1)
@@ -83,8 +88,8 @@ type PeriodicPalette struct {
 	Period int
 }
 
-func (p PeriodicPalette) SampleColor(val float64) color.Color {
-	if int(val) == glob.maxIterations-1 {
+func (p PeriodicPalette) SampleColor(val float64, maxIterations int) color.Color {
+	if isConvergent(val, maxIterations) {
 		return color.Black
 	}
 
