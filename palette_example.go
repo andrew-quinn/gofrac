@@ -30,9 +30,8 @@ var PrettyBands2 = NewUniformBandedPalette(
 	colorful.Hsv(52.0, 0.06, 1.00),
 )
 
-// BWStripes is a palette of one black and one white color band.
-// TODO: Rename to not imply periodicity
-var BWStripes = NewUniformBandedPalette(
+// BWBands is a palette of one black and one white color band.
+var BWBands = NewUniformBandedPalette(
 	colorful.Hsv(0, 0, 0),
 	colorful.Hsv(0, 0, 1),
 )
@@ -43,8 +42,8 @@ var PrettyBlends = BlendedBandedPalette(PrettyBands)
 // PrettyBlends2 is an interpolated version of PrettyBands2.
 var PrettyBlends2 = BlendedBandedPalette(PrettyBands2)
 
-// BWBlends is an interpolated version of BWStripes.
-var BWBlends = BlendedBandedPalette(BWStripes)
+// BWBlends is an interpolated version of BWBands.
+var BWBlends = BlendedBandedPalette(BWBands)
 
 // PrettyPeriodic is a periodic version of PrettyBands.
 var PrettyPeriodic = PeriodicPalette{
@@ -58,9 +57,8 @@ var PrettyPeriodic2 = PeriodicPalette{
 	BandedPalette: PrettyBands2,
 }
 
-// BWPeriodic is a periodic version of BWStripes for fans of zebras and Tim Burton.
-// TODO: Rename after renaming BWStripes
-var BWPeriodic = PeriodicPalette{
+// BWStripes is a periodic version of BWBands for fans of zebras and Tim Burton.
+var BWStripes = PeriodicPalette{
 	Period:        1,
-	BandedPalette: BWStripes,
+	BandedPalette: BWBands,
 }
