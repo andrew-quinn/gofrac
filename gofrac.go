@@ -24,6 +24,8 @@ func GetImage(f Fraccer, d DomainReader, plotter Plotter, palette ColorSampler, 
 		return nil, errors.New("gofrac: maximum iteration count must be greater than zero")
 	}
 
+	plotter.SetMaxIterations(maxIterations)
+
 	results, err := FracIt(d, f, maxIterations)
 	if err != nil {
 		return nil, err

@@ -46,7 +46,7 @@ func MandelbrotExample() {
 	img, err := GetImage(
 		NewMandelbrot(8000.0),
 		domain,
-		SmoothedEscapeTimePlotter{},
+		&SmoothedEscapeTimePlotter{},
 		&PrettyPeriodic,
 		2500,
 	)
