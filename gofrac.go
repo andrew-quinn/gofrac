@@ -6,7 +6,7 @@
 package gofrac
 
 import (
-	"fmt"
+	"errors"
 	"image"
 )
 
@@ -19,11 +19,14 @@ import (
 // palette maps floating point values to colors.
 // maxIterations gives the number of iterations to be performed before
 // considering a point to have converged.
-func GetImage(f Fraccer, d DomainReader, plotter Plotter, palette ColorSampler, maxIterations int) *image.RGBA {
+func GetImage(f Fraccer, d DomainReader, plotter Plotter, palette ColorSampler, maxIterations int) (*image.RGBA, error) {
+	if maxIterations < 1 {
+		return nil, errors.New("gofrac: maximum iteration count must be greater than zero")
+	}
+
 	results, err := FracIt(d, f, maxIterations)
 	if err != nil {
-		fmt.Println("gofrac: An error occurred while generating the fractal: ", err.Error())
-		return image.NewRGBA(image.Rect(0, 0, 0, 0))
+		return nil, err
 	}
 
 	bitmap := Render(results, plotter, palette)
@@ -34,5 +37,5 @@ func GetImage(f Fraccer, d DomainReader, plotter Plotter, palette ColorSampler, 
 			img.Set(x, y, clr)
 		}
 	}
-	return img
+	return img, nil
 }

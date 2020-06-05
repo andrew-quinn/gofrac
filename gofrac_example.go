@@ -5,6 +5,7 @@
 package gofrac
 
 import (
+	"fmt"
 	"image"
 	"image/png"
 	"os"
@@ -29,31 +30,54 @@ func writeExample(filename string, img *image.RGBA) {
 	png.Encode(outFile, img)
 }
 
+func handleExampleError(err error) {
+	fmt.Printf("gofrac: Example image generation failed with the following error: %v", err)
+}
+
 // MandelbrotExample generates the classic Mandelbrot image and stores it as
 // "mandelbrot.png".
 func MandelbrotExample() {
-	domain, _ := NewDomain(-2.5, -1.0, 1.0, 1.0, UHDRes.w, UHDRes.h)
+	domain, err := NewDomain(-2.5, -1.0, 1.0, 1.0, UHDRes.w, UHDRes.h)
+	if err != nil {
+		handleExampleError(err)
+		return
+	}
 
-	img := GetImage(
+	img, err := GetImage(
 		NewMandelbrot(8000.0),
 		domain,
 		SmoothedEscapeTimePlotter{},
 		&PrettyPeriodic,
 		2500,
 	)
+	if err != nil {
+		handleExampleError(err)
+		return
+	}
+
 	writeExample("mandelbrot.png", img)
 }
 
 // JuliaQExample generates an interesting quadratic Julia set and stores it as
 // "julia.png".
 func JuliaQExample() {
-	domain, _ := NewDomain(-1.6, -1.0, 1.6, 1.0, UHDRes.w, UHDRes.h)
-	img := GetImage(
+	domain, err := NewDomain(-1.6, -1.0, 1.6, 1.0, UHDRes.w, UHDRes.h)
+	if err != nil {
+		handleExampleError(err)
+		return
+	}
+
+	img, err := GetImage(
 		NewJuliaQ(1024.0, complex(-0.8, 0.156)),
 		domain,
 		&SmoothedEscapeTimePlotter{},
 		&SpectralPalette{Sweep: 360.0},
 		200,
 	)
+	if err != nil {
+		handleExampleError(err)
+		return
+	}
+
 	writeExample("julia.png", img)
 }
