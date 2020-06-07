@@ -6,6 +6,10 @@ package gofrac
 
 import "github.com/lucasb-eyer/go-colorful"
 
+// Spectrum is a spectral palette that starts at red and sweeps through the
+// color spectrum.
+var Spectrum = SpectralPalette{Sweep: 360}
+
 // PrettyBands is a color palette containing discrete bands of blue,
 // brown, and cream hues.
 var PrettyBands = NewUniformBandedPalette(
