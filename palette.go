@@ -23,6 +23,8 @@ func isConvergent(val float64, maxIterations int) bool {
 	return int(val) == maxIterations-1 || maxIterations <= 1
 }
 
+var black, _ = colorful.MakeColor(color.Black)
+
 // SpectralPalette contains a range of hues from portion of the HSV color space
 // where S and V are both 1.0. The palette starts at Offset degrees and
 // travels Sweep degrees around the HSV space.
@@ -33,11 +35,12 @@ type SpectralPalette struct {
 
 func (p SpectralPalette) SampleColor(val float64, maxIterations int) color.Color {
 	if isConvergent(val, maxIterations) {
-		return color.Black
+		return black
 	}
 
 	t := val / float64(maxIterations-1)
-	return colorful.Hsv(t*p.Sweep+p.Offset, 1.0, 1.0)
+	h := t*p.Sweep + p.Offset
+	return colorful.Hsl(h, 1.0, 0.5)
 }
 
 // BandedPalette is an alias for color.Palette, which itself is an alias for
@@ -53,11 +56,12 @@ func NewUniformBandedPalette(colors ...color.Color) BandedPalette {
 
 func (p BandedPalette) SampleColor(val float64, maxIterations int) color.Color {
 	if isConvergent(val, maxIterations) {
-		return color.Black
+		return black
 	}
 
 	i := int(float64(len(p)) * val / float64(maxIterations-1))
-	return p[i]
+	clr, _ := colorful.MakeColor(p[i])
+	return clr
 }
 
 // BlendedBandedPalette is a collection of interpolated color.Color items.
@@ -71,14 +75,30 @@ func NewUniformBlendedBandedPalette(colors ...color.Color) BlendedBandedPalette 
 
 func (p BlendedBandedPalette) SampleColor(val float64, maxIterations int) color.Color {
 	if isConvergent(val, maxIterations) {
-		return color.Black
+		return black
 	}
-	t := val / float64(glob.maxIterations-1)
-	scaledVal := t * float64(len(p)-1)
-	sv := int(scaledVal)
-	c1, _ := colorful.MakeColor(p[sv])
-	c2, _ := colorful.MakeColor(p[sv+1])
-	return c1.BlendLab(c2, scaledVal-math.Floor(scaledVal))
+
+	lastIdx := len(p) - 1
+	t := val / float64(maxIterations-2)
+	scaledVal := t * float64(lastIdx)
+
+	lo := math.Floor(scaledVal)
+	loIdx := int(lo)
+	blendT := scaledVal - lo
+
+	hi := math.Ceil(scaledVal)
+	hiIdx := int(hi)
+
+	if hiIdx > lastIdx {
+		hiIdx = lastIdx
+	}
+
+	c1, _ := colorful.MakeColor(p[loIdx])
+	c2, _ := colorful.MakeColor(p[hiIdx])
+
+	c := c1.BlendLab(c2, blendT)
+	clr, _ := colorful.MakeColor(c)
+	return clr
 }
 
 // PeriodicPalette is a cyclic palette of discrete color bands whose width is
@@ -90,9 +110,10 @@ type PeriodicPalette struct {
 
 func (p PeriodicPalette) SampleColor(val float64, maxIterations int) color.Color {
 	if isConvergent(val, maxIterations) {
-		return color.Black
+		return black
 	}
 
 	idx := (int(val) / p.Period) % len(p.BandedPalette)
-	return p.BandedPalette[idx]
+	clr, _ := colorful.MakeColor(p.BandedPalette[idx])
+	return clr
 }
