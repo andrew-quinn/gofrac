@@ -40,7 +40,7 @@ func Render(results *Results, plotter Plotter, palette ColorSampler) bitmap {
 				for col := 0; col < cols; col++ {
 					result := results.At(row, col)
 					val := plotter.Plot(result)
-					bitmap[row][col] = palette.SampleColor(val, glob.maxIterations)
+					bitmap[row][col] = palette.SampleColor(val, results.maxIterations)
 				}
 			}
 			wg.Done()

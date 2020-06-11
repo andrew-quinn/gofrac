@@ -15,23 +15,24 @@ type Plotter interface {
 	// Plot maps a Result object onto a floating point number.
 	Plot(r *Result) float64
 
-	// SetMaxIterations sets the maximum iteration count.
-	SetMaxIterations(n int)
+	// SetFracData sets Plotter's FracData member, which stores information
+	// about an iterate, which is necessary for some plotting functions.
+	SetFracData(fd *FracData)
 }
 
-type plotterData struct {
-	maxIterations int
+type PlotterBase struct {
+	FracData
 }
 
-func (it *plotterData) SetMaxIterations(n int) {
-	it.maxIterations = n
+func (pb *PlotterBase) SetFracData(fd *FracData) {
+	pb.FracData = *fd
 }
 
 // EscapeTimePlotter implements the basic plotting method for fractals, which
 // relies solely on the escape time (i.e., pre-bailout iteration count) of an
 // iterated calculation.
 type EscapeTimePlotter struct {
-	plotterData
+	PlotterBase
 }
 
 func (p EscapeTimePlotter) Plot(r *Result) float64 {
@@ -41,7 +42,8 @@ func (p EscapeTimePlotter) Plot(r *Result) float64 {
 var invLog2 = math.Log2E
 
 // this currently only works for quadratic fractals
-func smooth(val float64, z complex128, maxIt int) float64 {
+func smooth(val float64, z complex128, d *FracData) float64 {
+	maxIt := d.MaxIterations
 	h := math.Log(cmplx.Abs(z)) / math.Log(float64(maxIt-1))
 	return val - math.Log(h-1)*invLog2
 }
@@ -49,27 +51,31 @@ func smooth(val float64, z complex128, maxIt int) float64 {
 // SmoothedEscapeTimePlotter maps a Result to a value in a way analogous to
 // calculating the Result's electrostatic potential.
 type SmoothedEscapeTimePlotter struct {
-	plotterData
+	PlotterBase
 }
 
 func (p SmoothedEscapeTimePlotter) Plot(r *Result) float64 {
-	if r.Iterations == p.maxIterations-1 {
+	d := p.Data()
+	maxIt := d.MaxIterations
+	if r.Iterations == maxIt-1 {
 		return float64(r.Iterations)
 	}
-	return smooth(float64(r.Iterations), r.Z, p.maxIterations)
+	return smooth(float64(r.Iterations), r.Z, d)
 }
 
 // NormalizedEscapeTimePlotter is a version of the escape time plotting method
 // in which values are normalized according to the set of diverging results.
 type NormalizedEscapeTimePlotter struct {
-	plotterData
+	PlotterBase
 }
 
 func (p NormalizedEscapeTimePlotter) Plot(r *Result) float64 {
-	if r.Iterations == p.maxIterations-1 {
+	d := p.Data()
+	maxIt := d.MaxIterations
+	if r.Iterations == maxIt-1 {
 		return float64(r.Iterations)
 	}
-	return math.Floor(r.NFactor * float64(p.maxIterations-2))
+	return math.Floor(r.NFactor * float64(maxIt-2))
 }
 
 // NormalizedSmoothedEscapeTimePlotter performs the electrostatic potential
@@ -79,10 +85,12 @@ type NormalizedSmoothedEscapeTimePlotter struct {
 }
 
 func (p NormalizedSmoothedEscapeTimePlotter) Plot(r *Result) float64 {
+	d := p.Data()
+	maxIt := d.MaxIterations
 	val := p.NormalizedEscapeTimePlotter.Plot(r)
-	if int(val) == p.NormalizedEscapeTimePlotter.maxIterations-1 {
+	if int(val) == maxIt-1 {
 		return val
 	}
 
-	return smooth(val, r.Z, p.maxIterations)
+	return smooth(val, r.Z, d)
 }

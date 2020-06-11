@@ -17,14 +17,15 @@ import (
 // d is the input domain.
 // plotter maps outputs of f to floating point values.
 // palette maps floating point values to colors.
-// maxIterations gives the number of iterations to be performed before
+// MaxIterations gives the number of iterations to be performed before
 // considering a point to have converged.
 func GetImage(f Fraccer, d DomainReader, plotter Plotter, palette ColorSampler, maxIterations int) (*image.RGBA, error) {
 	if maxIterations < 1 {
 		return nil, errors.New("gofrac: maximum iteration count must be greater than zero")
 	}
 
-	plotter.SetMaxIterations(maxIterations)
+	f.SetMaxIterations(maxIterations)
+	plotter.SetFracData(f.Data())
 
 	results, err := FracIt(d, f, maxIterations)
 	if err != nil {

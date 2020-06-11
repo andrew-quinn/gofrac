@@ -23,7 +23,9 @@ func (d fakeDomain) Dimensions() (rows int, cols int) {
 	return dimensionsMock()
 }
 
-type fakeFrac struct{}
+type fakeFrac struct {
+	gofrac.FracData
+}
 
 var mockFrac func(complex128) *gofrac.Result
 
@@ -32,6 +34,16 @@ func (f fakeFrac) Frac(loc complex128) *gofrac.Result {
 }
 
 // real stuff
+
+func cmpResult(want gofrac.Result, got gofrac.Result) bool {
+	if want.Iterations == got.Iterations &&
+		want.C == got.C &&
+		want.Z == got.Z &&
+		want.NFactor == got.NFactor {
+		return true
+	}
+	return false
+}
 
 func TestFracIt(t *testing.T) {
 	mockFrac = func(complex128) *gofrac.Result {
@@ -43,7 +55,7 @@ func TestFracIt(t *testing.T) {
 		dimensionsMock = func() (int, int) {
 			return it, it
 		}
-		_, err := gofrac.FracIt(fakeDomain{}, fakeFrac{}, 1)
+		_, err := gofrac.FracIt(fakeDomain{}, &fakeFrac{}, 1)
 		if err == nil {
 			t.Errorf("Error not caught for malformed domain")
 		}
@@ -56,7 +68,7 @@ func TestFracIt(t *testing.T) {
 
 	// bad iterations argument
 	for _, it := range []int{-1, 0} {
-		_, err := gofrac.FracIt(fakeDomain{}, fakeFrac{}, it)
+		_, err := gofrac.FracIt(fakeDomain{}, &fakeFrac{}, it)
 		if err == nil {
 			t.Errorf("Error not caught for bad iteration count")
 		}
@@ -73,14 +85,16 @@ func TestFracIt(t *testing.T) {
 	mockFrac = func(complex128) *gofrac.Result {
 		return &degenerateResult
 	}
-	rDegenerate, err := gofrac.FracIt(fakeDomain{}, fakeFrac{}, degenerateIterations)
+	rDegenerate, err := gofrac.FracIt(fakeDomain{}, &fakeFrac{}, degenerateIterations)
 	if err != nil {
 		t.Error(err)
 	}
-	for _, row := range *rDegenerate {
-		for _, result := range row {
-			if result != degenerateResult {
-				t.Errorf("%T: Unexpected Result for degenerate case. wanted: %v, got: %v", rDegenerate, degenerateResult, result)
+	rows, cols := rDegenerate.Dimensions()
+	for row := 0; row < rows; row++ {
+		for col := 0; col < cols; col++ {
+			got := *rDegenerate.At(row, col)
+			if !cmpResult(degenerateResult, got) {
+				t.Errorf("%T: Unexpected Result for degenerate case. wanted: %v, got: %v", rDegenerate, degenerateResult, got)
 			}
 		}
 	}
@@ -89,20 +103,22 @@ func TestFracIt(t *testing.T) {
 	normalResult := gofrac.Result{
 		Z:          0,
 		C:          0,
-		Iterations: 4, // all diverge in less than maxIterations-1 time
+		Iterations: 4, // all diverge in less than MaxIterations-1 time
 		NFactor:    1, // since all results have the same value for Iterations
 	}
 	mockFrac = func(complex128) *gofrac.Result {
 		return &normalResult
 	}
-	r, err := gofrac.FracIt(fakeDomain{}, fakeFrac{}, 10)
+	r, err := gofrac.FracIt(fakeDomain{}, &fakeFrac{}, 10)
 	if err != nil {
 		t.Error(err)
 	}
-	for _, row := range *r {
-		for _, result := range row {
-			if result != normalResult {
-				t.Errorf("%T: Unexpected Result for normal case. wanted: %v, got: %v", rDegenerate, degenerateResult, result)
+	rows, cols = r.Dimensions()
+	for row := 0; row < rows; row++ {
+		for col := 0; col < cols; col++ {
+			got := *r.At(row, col)
+			if !cmpResult(normalResult, got) {
+				t.Errorf("%T: Unexpected Result for normal case. wanted: %v, got: %v", r, normalResult, got)
 			}
 		}
 	}
