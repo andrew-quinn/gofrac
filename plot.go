@@ -39,13 +39,8 @@ func (p EscapeTimePlotter) Plot(r *Result) float64 {
 	return float64(r.Iterations)
 }
 
-var invLog2 = math.Log2E
-
-// this currently only works for quadratic fractals
 func smooth(val float64, z complex128, d *FracData) float64 {
-	maxIt := d.MaxIterations
-	h := math.Log(cmplx.Abs(z)) / math.Log(float64(maxIt-1))
-	return val - math.Log(h-1)*invLog2
+	return val + 1 - math.Log(math.Log(cmplx.Abs(z)))*d.logDegreeInv
 }
 
 // SmoothedEscapeTimePlotter maps a Result to a value in a way analogous to
