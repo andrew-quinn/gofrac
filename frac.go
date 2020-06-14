@@ -147,6 +147,7 @@ func NewQuadratic(radius float64) Quadratic {
 	return q
 }
 
+
 // NewMandelbrot constructs a Mandelbrot struct with a given bailout radius.
 func NewMandelbrot(radius float64) *Mandelbrot {
 	return &Mandelbrot{
@@ -154,7 +155,40 @@ func NewMandelbrot(radius float64) *Mandelbrot {
 	}
 }
 
+// isCardioidOrP2Bulb detects points within the first and second order
+// convergent zones of the Mandelbrot set.
+func isCardioidOrP2Bulb(z complex128, maxIt int) bool {
+	reZ := real(z)
+	imZ := imag(z)
+
+	rzp := reZ - 0.25
+	imz2 := imZ * imZ
+
+	// Cardioid test:
+	// q = \left(\Re(z) - \frac{1}{4}\right)^2 + \Im(z)^2
+	// q \left( q \left( \Re(z) - \frac{1}{4} \right ) \right ) \leq \frac{\Im(z)^2}{4}
+	q := rzp*rzp + imz2
+	isCardiod := q*(q+rzp) <= 0.25*imz2
+
+	if isCardiod {
+		return true
+	}
+
+	// P2 test:
+	// \left(\Re\left(z \right ) + 1 \right )^2 + \Im\left(z\right)^2 \leq \left(\frac{1}{4}\right)^2
+	isP2Bulb := (reZ+1)*(reZ+1)+imZ*imZ <= 0.0625
+	return isP2Bulb
+
+}
+
 func (m Mandelbrot) Frac(loc complex128) *Result {
+	if isCardioidOrP2Bulb(loc, m.MaxIterations) {
+		return &Result{
+			Z:          loc,
+			C:          0,
+			Iterations: m.MaxIterations - 1,
+		}
+	}
 	return m.q(0, loc)
 }
 
