@@ -24,6 +24,13 @@ type PlotterBase struct {
 	FracData
 }
 
+func (pb *PlotterBase) plot(r *Result, pFunc func(r *Result) float64) float64 {
+	if r.Iterations == pb.MaxIterations-1 {
+		return float64(r.Iterations)
+	}
+	return pFunc(r)
+}
+
 func (pb *PlotterBase) SetFracData(fd *FracData) {
 	pb.FracData = *fd
 }
@@ -39,8 +46,13 @@ func (p EscapeTimePlotter) Plot(r *Result) float64 {
 	return float64(r.Iterations)
 }
 
-func smooth(val float64, z complex128, d *FracData) float64 {
-	return val + 1 - math.Log(math.Log(cmplx.Abs(z)))*d.logDegreeInv
+func smooth(val float64, z complex128, d FracDataGetter) float64 {
+	mod := cmplx.Abs(z)
+	if mod == 0 {
+		return val
+	}
+	lgBase := d.Data().logDegreeInv
+	return val + 1 - math.Log(math.Log(mod))*lgBase
 }
 
 // SmoothedEscapeTimePlotter maps a Result to a value in a way analogous to
@@ -50,12 +62,9 @@ type SmoothedEscapeTimePlotter struct {
 }
 
 func (p SmoothedEscapeTimePlotter) Plot(r *Result) float64 {
-	d := p.Data()
-	maxIt := d.MaxIterations
-	if r.Iterations == maxIt-1 {
-		return float64(r.Iterations)
-	}
-	return smooth(float64(r.Iterations), r.Z, d)
+	return p.plot(r, func(r *Result) float64 {
+		return smooth(float64(r.Iterations), r.Z, &p)
+	})
 }
 
 // NormalizedEscapeTimePlotter is a version of the escape time plotting method
@@ -65,12 +74,9 @@ type NormalizedEscapeTimePlotter struct {
 }
 
 func (p NormalizedEscapeTimePlotter) Plot(r *Result) float64 {
-	d := p.Data()
-	maxIt := d.MaxIterations
-	if r.Iterations == maxIt-1 {
-		return float64(r.Iterations)
-	}
-	return math.Floor(r.NFactor * float64(maxIt-2))
+	return p.plot(r, func(r *Result) float64 {
+		return math.Floor(r.NFactor * float64(p.MaxIterations-2))
+	})
 }
 
 // NormalizedSmoothedEscapeTimePlotter performs the electrostatic potential
@@ -80,12 +86,7 @@ type NormalizedSmoothedEscapeTimePlotter struct {
 }
 
 func (p NormalizedSmoothedEscapeTimePlotter) Plot(r *Result) float64 {
-	d := p.Data()
-	maxIt := d.MaxIterations
-	val := p.NormalizedEscapeTimePlotter.Plot(r)
-	if int(val) == maxIt-1 {
-		return val
-	}
-
-	return smooth(val, r.Z, d)
+	return p.plot(r, func(r *Result) float64 {
+		return smooth(p.NormalizedEscapeTimePlotter.Plot(r), r.Z, p.Data())
+	})
 }

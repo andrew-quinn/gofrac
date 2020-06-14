@@ -19,8 +19,12 @@ type Fraccer interface {
 	// Frac performs iterations of a fractal equation for a complex number
 	// given by loc.
 	Frac(loc complex128) *Result
-	Data() *FracData
 	SetMaxIterations(iterations int) error
+	FracDataGetter
+}
+
+type FracDataGetter interface {
+	Data() *FracData
 }
 
 // FracIt applies the fractal calculation given by f to every sample in the
@@ -79,9 +83,10 @@ type FracData struct {
 	// exceeded Radius.
 	MaxIterations int
 
-	// Degree is the degree of the complex polynomial function to be iterated.
+	// degree is the degree of the complex polynomial function to be iterated.
 	degree float64
 
+	// the inverse of the log of degree
 	logDegreeInv float64
 }
 
@@ -165,7 +170,7 @@ type JuliaQ struct {
 func NewJuliaQ(radius float64, c complex128) *JuliaQ {
 	return &JuliaQ{
 		Quadratic: NewQuadratic(radius),
-		C: c,
+		C:         c,
 	}
 }
 
