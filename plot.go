@@ -90,3 +90,15 @@ func (p NormalizedSmoothedEscapeTimePlotter) Plot(r *Result) float64 {
 		return smooth(p.NormalizedEscapeTimePlotter.Plot(r), r.Z, p.Data())
 	})
 }
+
+// PhasePlotter plots an escaped iterate according to its phase when it
+// escapes.
+type PhasePlotter struct {
+	PlotterBase
+}
+
+func (p PhasePlotter) Plot(r *Result) float64 {
+	return p.plot(r, func(r *Result) float64 {
+		return float64(p.MaxIterations-1) * (cmplx.Phase(r.Z) + math.Pi) / (2 * math.Pi)
+	})
+}
