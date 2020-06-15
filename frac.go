@@ -147,7 +147,6 @@ func NewQuadratic(radius float64) Quadratic {
 	return q
 }
 
-
 // NewMandelbrot constructs a Mandelbrot struct with a given bailout radius.
 func NewMandelbrot(radius float64) *Mandelbrot {
 	return &Mandelbrot{
@@ -234,5 +233,71 @@ func (r JuliaR) Frac(loc complex128) *Result {
 		Z:          z,
 		C:          r.C,
 		Iterations: count,
+	}
+}
+
+// Polynomiograph contains the data necessary to perform the style of
+// computations described by Kalantari (et al) in several publications. See,
+// for example, https://www.tandfonline.com/doi/full/10.1080/17513472.2019.1600959
+type Polynomiograph struct {
+	FracData
+	// B is a root-finding rational polynomial of the family used in Newton's,
+	// Halley's, or higher-order methods. See the link above for a generalized
+	// form.
+	B   func(z complex128) complex128
+
+	// F maps the input location to an initial value.
+	F   func(loc complex128) complex128
+
+	// G is the transformation applied to the value c_n after z_{n+1} has been
+	// calculated during iterations. That is,
+	//    z_{n+1} = B(z_n) + c_n,
+	//    c_{n+1} = G(c_n)
+	G   func(c complex128) complex128
+
+	// eps is the convergence threshold.
+	eps float64
+}
+
+// MandelPG is a Mandelbrot-style polynomiograph
+type MandelPG Polynomiograph
+
+// CCMap is simply a short name for a function f: C -> C
+type CCMap func(complex128) complex128
+
+// NewMandePG returns a new structure with the members required for
+// Mandelbrot-style polynomiograph calculations.
+func NewMandelPG(eps float64, B CCMap, F CCMap, G CCMap) *MandelPG {
+	mandel := MandelPG {
+		B: B,
+		F: F,
+		G: G,
+		eps : eps,
+	}
+	return &mandel
+}
+
+func (m MandelPG) Frac(loc complex128) *Result {
+	z := loc
+	c := m.F(loc)
+	count := 0
+	for {
+		zNext := m.B(z) - c
+		if cmplx.Abs(zNext - z) < m.eps {
+			break
+		}
+		c = m.G(c)
+		z = zNext
+		if count == m.MaxIterations-1 {
+			break
+		}
+		count++
+	}
+
+	return &Result{
+		Z:          z,
+		C:          c,
+		Iterations: count,
+		NFactor:    0,
 	}
 }
