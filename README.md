@@ -145,7 +145,7 @@ depending on your needs.
 License: 3-Clause BSD
 ===================
 
-Copyright (c) 2020, Andrew Quinn
+Copyright (c) 2020, Andrew Quinn\
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
