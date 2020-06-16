@@ -112,7 +112,7 @@ needed to produce it.
 maxIt := 250
 ```
 
-### Generating an image
+### Generate an image
 
 With everything chosen, the only thing left to do is to tell gofrac to create
 an image for you. The GetImage function does exactly that. Using the objects
