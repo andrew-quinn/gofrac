@@ -1,6 +1,8 @@
 # gofrac
 A simple library for generating fractals.
 
+![Julia set](doc/julia.png)
+
 ### Fractals
 
 It's difficult to pin down a single, authoritative definition of exactly what a
