@@ -116,13 +116,22 @@ type Quadratic struct {
 	FracData
 }
 
+func getMod2(z complex128) float64 {
+	a, b := real(z), imag(z)
+	return a*a + b+b
+}
+
 func (q Quadratic) q(z complex128, c complex128) *Result {
 	count := 0
-	for mod := cmplx.Abs(z); mod <= q.Radius; mod, count = cmplx.Abs(z), count+1 {
+	r2 := q.Radius * q.Radius
+	maxIt := q.MaxIterations-1
+	for mod2 := getMod2(z); mod2 <= r2; mod2 = getMod2(z) {
 		z = z*z + c
-		if count == q.MaxIterations-1 {
+		if count == maxIt {
 			break
 		}
+		mod2 = getMod2(z)
+		count++
 	}
 	return &Result{
 		Z:          z,
